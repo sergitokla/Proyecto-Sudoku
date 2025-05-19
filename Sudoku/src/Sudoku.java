@@ -119,6 +119,16 @@ public class Sudoku {
         return true; //Si todo esta bien el tablero esta resuelto
     }
 
+    // Mostramos el tablero por consola
+    public void mostrarTablero() {
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                System.out.print(tablero[i][j] + " ");
+            }
+            System.out.println();
+        }
+    }
+
     // Getters y setters
     public int[][] getTablero() {
         return tablero;
