@@ -88,7 +88,14 @@ classDiagram
 ```
 
 ## 3. Matriz de Trazabilidad
-
+| Requisito | Clase/Método                     | Prueba JUnit                           |
+|-----------|----------------------------------|----------------------------------------|
+| RF1       | `GeneradorSudoku.generarTablero()` | `GeneradorSudokuTest.testGenerarTableroFacil()`      |
+| RF2       | `Sudoku.colocarNumero()`         | `SudokuTest.testColocarNumero()`       |
+| RF3       | `Sudoku.esMovimientoValido()`    | `SudokuTest.testMovimientoInvalido()`  |
+| RF4       | `Sudoku.estaResuelto()`          | `SudokuTest.testEstaResuelto()`        |
+| RF5       | `SudokuGUI`                      | `SudokuGUITest.testCreacionGUI()`         |
+| RNF5      | Todas las clases                 | Múltiples pruebas con JUnit            |
 
 ---
 
@@ -110,3 +117,4 @@ Los resultados de las pruebas se adjuntan con capturas:
 ![alt text](ImgTest/image.png)
 ![alt text](ImgTest/image-1.png)
 ![alt text](ImgTest/image-2.png)
+
