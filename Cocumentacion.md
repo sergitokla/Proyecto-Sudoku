@@ -20,12 +20,12 @@ Desarrollar una aplicación de escritorio en Java que permita a los usuarios jug
 
 ## Casos de Uso
 
-| ID    | Nombre             | Actor(es) | Precondición                  | Flujo Principal             || Postcondición                   |
+| ID    | Nombre             | Actor(es) | Precondición                  | Flujo Principal                                           | Flujos Alternativos                 | Postcondición                   |
 | ----- | ------------------ | --------- | ----------------------------- | --------------------------------------------------------- | ----------------------------------- | ------------------------------- |
-| CU-01 | Generar Sudoku     | Usuario   | Inicio de juego               | 1. Usuario selecciona nivel<br>2. Sistema genera tablero  |  | Tablero Sudoku generado         |
-| CU-02 | Introducir número  | Usuario   | Tablero generado              | 1. Usuario introduce número en celda<br>2. Sistema valida |  | Número insertado o rechazo      |
-| CU-03 | Validar movimiento | Sistema   | Número introducido            | Sistema comprueba reglas Sudoku                        |  | Movimiento aceptado o rechazado |
-| CU-04 | Mostrar error      | Sistema   | Movimiento inválido detectado | El sistema muestra mensaje de error                       |                                  | Usuario informado del error     |
+| CU-01 | Generar Sudoku     | Usuario   | Inicio de juego               | 1. Usuario selecciona nivel<br>2. Sistema genera tablero  | 2a. Error generación → mensaje      | Tablero Sudoku generado         |
+| CU-02 | Introducir número  | Usuario   | Tablero generado              | 1. Usuario introduce número en celda<br>2. Sistema valida | 2a. Número inválido → error         | Número insertado o rechazo      |
+| CU-03 | Validar movimiento | Sistema   | Número introducido            | 1. Sistema comprueba reglas Sudoku                        | 1a. Movimiento inválido → excepción | Movimiento aceptado o rechazado |
+| CU-04 | Mostrar error      | Sistema   | Movimiento inválido detectado | 1. Sistema muestra mensaje de error                       | -                                   | Usuario informado del error     |
 
 ### Objetivos
 - Proveer un juego funcional y estable de Sudoku
@@ -41,40 +41,76 @@ Incluye las siguientes clases principales:
 - `GeneradorSudoku`: Genera tableros válidos.
 - `JuegoSudoku`: Controla el flujo del juego.
 - `SudokuGUI`: Implementa la interfaz gráfica.
+- `EntradaFueraDeRangoException`: Lanza la excepcion.
+- `MovimientoInvalidoException`: Lanza la excepcion.
+- `SudokuException`: Clase base para las excepciones.
 
 ```mermaid
 classDiagram
+    class SudokuException {
+        <<exception>>
+        +SudokuException(String message)
+    }
 
-class Sudoku {
-  - int[][] tablero
-  - boolean[][] celdasFijas
-  + void generarTablero(String dificultad)
-  + boolean esMovimientoValido(int fila, int columna, int valor)
-  + void colocarNumero(int fila, int columna, int valor)
-  + boolean estaResuelto()
-  + void mostrarTablero()
-}
+    class EntradaFueraDeRangoException {
+        <<exception>>
+        +EntradaFueraDeRangoException(String message)
+    }
 
-class GeneradorSudoku {
-  + int[][] generarFacil()
-  + int[][] generarMedio()
-  + int[][] generarDificil()
-  + boolean resolver(int[][] tablero)
-}
+    class MovimientoInvalidoException {
+        <<exception>>
+        +MovimientoInvalidoException(String message)
+    }
 
-class JuegoSudoku {
-  + void iniciar()
-}
+    class GeneradorSudoku {
+        -Random random
+        +generarTablero(Sudoku sudoku, String dificultad) void
+        -generarTableroResuelto(Sudoku sudoku, int fila, int col) boolean
+        -eliminarCeldas(Sudoku sudoku, int celdasAEliminar) void
+    }
 
-class SudokuGUI {
-  + void mostrarInterfaz()
-  + void capturarEntrada()
-  + void actualizarTablero()
-}
+    class Sudoku {
+        -int[][] tablero
+        -boolean[][] celdasFijas
+        +Sudoku()
+        +generarTablero(String dificultad) void
+        +esMovimientoValido(int fila, int columna, int valor) boolean
+        +colocarNumero(int fila, int columna, int valor) boolean
+        +estaResuelto() boolean
+        +mostrarTablero() void
+        +limpiarTablero() void
+        +getTablero() int[][]
+        +setTablero(int[][] tablero) void
+        +getCeldasFijas() boolean[][]
+        +setCeldasFijas(boolean[][] celdasFijas) void
+    }
 
-Sudoku --> GeneradorSudoku : utiliza
-JuegoSudoku --> Sudoku : usa
-SudokuGUI --> Sudoku : interactúa con
+    class SudokuGUI {
+        -Sudoku sudoku
+        -JFrame frame
+        -JButton[][] botones
+        -JComboBox<String> dificultadComboBox
+        +SudokuGUI()
+        -inicializarGUI() void
+        -manejarClicCelda(int fila, int col) void
+        -actualizarTablero() void
+    }
+
+    class JuegoSudoku {
+        +main(String[] args) void
+    }
+
+    EntradaFueraDeRangoException --|> SudokuException
+    MovimientoInvalidoException --|> SudokuException
+    
+    Sudoku --> GeneradorSudoku: usa
+    Sudoku --> MovimientoInvalidoException: lanza
+    Sudoku --> EntradaFueraDeRangoException: lanza
+    
+    SudokuGUI --> Sudoku: contiene
+    SudokuGUI --> SudokuException: maneja
+    
+    JuegoSudoku --> SudokuGUI: lanza
 ```
 
 ### Diagrama de Casos de Uso
@@ -99,32 +135,63 @@ classDiagram
 
     Usuario --> Sistema : usa
 ```
+## Diagrama de Actividad
 
+```mermaid
+flowchart TD
+  Inicio((●))
+  IntroducirNumero([Introducir número en celda])
+  ValidarMovimiento{¿Movimiento válido?}
+  MostrarError([Mostrar mensaje de error])
+  ActualizarTablero([Actualizar tablero])
+  Fin((◉))
+
+  Inicio --> IntroducirNumero --> ValidarMovimiento
+  ValidarMovimiento -- Sí --> ActualizarTablero --> Fin
+  ValidarMovimiento -- No --> MostrarError --> Fin
+
+```
 ## 3. Matriz de Trazabilidad
-| Requisito | Clase/Método                     | Prueba JUnit                           |
-|-----------|----------------------------------|----------------------------------------|
-| RF1       | `GeneradorSudoku.generarTablero()` | `GeneradorSudokuTest.testGenerarTableroFacil()`      |
-| RF2       | `Sudoku.colocarNumero()`         | `SudokuTest.testColocarNumero()`       |
-| RF3       | `Sudoku.esMovimientoValido()`    | `SudokuTest.testMovimientoInvalido()`  |
-| RF4       | `Sudoku.estaResuelto()`          | `SudokuTest.testEstaResuelto()`        |
-| RF5       | `SudokuGUI`                      | `SudokuGUITest.testCreacionGUI()`         |
-| RNF5      | Todas las clases                 | Múltiples pruebas con JUnit            |
+| Req. ID | Objetivo(s) | Caso de Uso / Diseño     | Caso de Prueba               |
+| ------- | ----------- | ------------------------ | ---------------------------- |
+| RF-01   | OBJ-01      | CU-01 Generar Sudoku     |  Generación tablero     |
+| RF-02   | OBJ-01      | CU-02 Introducir número  | Inserción número       |
+| RF-03   | OBJ-01      | CU-03 Validar movimiento | Validación movimientos |
+| RF-04   | OBJ-01      | CU-04 Mostrar error      | Mensajes de error      |
 ---
 ## 4. Código Fuente
-El proyecto incluye las siguientes clases, todas documentadas y comentadas en el código:
+El proyecto incluye las siguientes clases principales, todas documentadas y comentadas en el código:
 
 - `Sudoku.java`
 - `GeneradorSudoku.java`
 - `JuegoSudoku.java`
 - `SudokuGUI.java`
+- `SudokuException.java`
+- `EntradaFueraDeRangoException.java`
+- `MovimientoInvalidoException.java`
+- `ExcepcionesTest.java`
+- `GeneradorSudokuTest.java`
+- `SudokuGUITest.java`
+- `SudokuTest.java`
+
 
 ---
 
-## 5. Pruebas Unitarias con JUnit
+## 5. Excepciones 
+
+El proyecto implementa excepciones específicas para manejar errores particulares:
+
+- SudokuException.java: Clase base para las excepciones personalizadas en el proyecto.
+
+- MovimientoInvalidoException.java: Excepción lanzada cuando un movimiento viola las reglas del Sudoku.
+
+- EntradaFueraDeRangoException.java: Excepción para entradas fuera de los límites válidos del tablero.
+
+## 6. Pruebas Unitarias con JUnit
 
 ### Resultados
 Los resultados de las pruebas se adjuntan con capturas:
-![alt text](ImgTest/image.png)
-![alt text](ImgTest/image-1.png)
-![alt text](ImgTest/image-2.png)
-
+![alt text](image.png)
+![alt text](image-1.png)
+![alt text](image-2.png)
+![alt text](image-3.png)
