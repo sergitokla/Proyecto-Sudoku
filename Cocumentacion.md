@@ -191,7 +191,7 @@ El proyecto implementa excepciones específicas para manejar errores particulare
 
 ### Resultados
 Los resultados de las pruebas se adjuntan con capturas:
-![alt text](image.png)
-![alt text](image-1.png)
-![alt text](image-2.png)
-![alt text](image-3.png)
+![alt text](ImgTest/image.png)
+![alt text](ImgTest/image-1.png)
+![alt text](ImgTest/image-2.png)
+![alt text](ImgTest/image-3.png)
