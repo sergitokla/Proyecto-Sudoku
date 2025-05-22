@@ -51,25 +51,28 @@ public class Sudoku {
         return true;
     }
 
-    //Para intentar colocar un numero en una celda
-    public boolean colocarNumero(int fila, int columna, int valor) {
-
-        //No se puede modificar una celda fija
+    //Metodo para intentar colocar un numero en una celda
+    //He puesto los parametros fila, columna y valor; y lanza:
+    // MovimientoInvalidoException si se intenta modificar una celda fija o si el movimiento no es valido.
+    //EntradaFueraDeRangoException si el numero no está en el rango permitido (0 a 9).
+    public boolean colocarNumero(int fila, int columna, int valor) throws MovimientoInvalidoException, EntradaFueraDeRangoException {
+        // Se verifica que la celda es fija
         if (celdasFijas[fila][columna]) {
-            return false;
+            throw new MovimientoInvalidoException("No se puede modificar una celda fija. Seleccione una celda editable.");
         }
 
-        //Solo se aceptan numeros del 1 al 9
-        if (valor < 1 || valor > 9) {
-            return false;
+        //Se verifica que el numero este en el rango permitido, permitido poner 0 para borrar un numero que el usuario haya colocado antes
+        if (valor < 0 || valor > 9) {
+            throw new EntradaFueraDeRangoException("El valor debe estar entre 1 y 9 (0 para borrar).");
         }
 
-        //Si el numero es valido se coloca en el tablero
+        // Si el numero es valido se coloca en el tablero
         if (esMovimientoValido(fila, columna, valor)) {
             tablero[fila][columna] = valor;
             return true;
         }
-        return false;
+        //Si no es un movimiento valido lanzamos una excepcion indicando el motivo
+        throw new MovimientoInvalidoException("El número " + valor + " no es válido en esta posición. Ya existe en la fila, columna o subcuadrícula.");
     }
 
     //Comprobamos si el tablero esta completamente resuelto de forma correcta

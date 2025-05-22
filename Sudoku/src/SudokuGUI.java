@@ -130,45 +130,51 @@ public class SudokuGUI {
         frame.setVisible(true);
     }
 
-    //Hacemos un metodo que se ejecuta al hacer clic sobre una celda del tablero
+    //Hacemos el metodo que maneja la accion del clic sobre la celda del tablero
     private void manejarClicCelda(int fila, int col) {
 
-        //Si la celda es fija (que no sea editable), mostramos un mensaje de advertencia
+        //Verificamos si la celda es fija
         if (sudoku.getCeldasFijas()[fila][col]) {
-            JOptionPane.showMessageDialog(frame, "Esta celda es fija y no se puede modificar.", "Celda fija", JOptionPane.WARNING_MESSAGE);
-            return;
+
+            //Si es fija mostramos el mensaje de que es fija y no modificable
+            JOptionPane.showMessageDialog(frame, "Esta celda es fija y no se puede modificar.",
+                    "Celda fija", JOptionPane.WARNING_MESSAGE);
+            return;//Sale del metodo porque no se puede modificar la celda
         }
+        //Pedimos al usuario que ponga un numero para colocar en la celda
+        String input = JOptionPane.showInputDialog(frame,
+                "Ingrese un número del 1 al 9 (0 para borrar):",
+                "Ingresar número", JOptionPane.PLAIN_MESSAGE);
 
-        //Mostramos un cuadro para introducir un numero
-        String input = JOptionPane.showInputDialog(frame, "Ingrese un número del 1 al 9 (0 para borrar):", "Ingresar número", JOptionPane.PLAIN_MESSAGE);
-
-        //Si no se escribe nada o cancela, se sale
+        //Si el usuario cancela o no escribe nada, se sale sin hacer nada
         if (input == null || input.isEmpty()) {
             return;
         }
 
         try {
-            int valor = Integer.parseInt(input);//Convertimos el imput en numero
+            int valor = Integer.parseInt(input);
 
-            if (valor == 0) {//Si se pone 0 se borra la celda
-                sudoku.getTablero()[fila][col] = 0;
-                actualizarTablero();
-                return;
-            }
+            try {
+                //Si el usuario pone 0 se interpreta como borrar la celda
+                if (valor == 0) {
+                    sudoku.getTablero()[fila][col] = 0;//Borramos la celda
+                    actualizarTablero();//Se actualiza la interfaz grafica
+                    return;
+                }
 
-            if (valor < 1 || valor > 9) {
-                JOptionPane.showMessageDialog(frame, "Por favor ingrese un número entre 1 y 9.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            //Para que intente colocar el numero en el tablero
-            if (sudoku.colocarNumero(fila, col, valor)) {
-                actualizarTablero();
-            } else {
-                JOptionPane.showMessageDialog(frame, "Movimiento inválido. El número ya está en la fila, columna o subcuadrícula.", "Error", JOptionPane.ERROR_MESSAGE);
+                //Se intenta colocar un numero en la celda, si es valido actualiza el tablero visiblemente
+                if (sudoku.colocarNumero(fila, col, valor)) {
+                    actualizarTablero();
+                }
+            } catch (SudokuException e) {
+                //Si ocurre algun error especifico del juego, muestra el mensaje correspondiente
+                JOptionPane.showMessageDialog(frame, e.getMessage(),
+                        "Error en el movimiento", JOptionPane.ERROR_MESSAGE);
             }
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(frame, "Por favor ingrese un número válido.", "Error", JOptionPane.ERROR_MESSAGE);
+            //Si el usuario ingresa un valor no valido como letras, muestra un mensaje de error
+            JOptionPane.showMessageDialog(frame, "Por favor ingrese un número válido.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
     //Para actualizar los textos y estilos de los botones segun el estado del tablero

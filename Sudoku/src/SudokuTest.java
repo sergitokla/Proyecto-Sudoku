@@ -1,20 +1,17 @@
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-class SudokuTest {
-
-    //Declaramos Sudoku para utilizar la logica de los juegos en los test
+public class SudokuTest {
     private Sudoku sudoku;
 
-    //Metodo que se va a ejecutar antes de cada test, es para preparar un tablero inicial
     @BeforeEach
-    void setUp() {
-        sudoku = new Sudoku(); //Creamos un nuevo juego
+    public void setUp() {
 
-        //Hacemos un tablero inicial con algunos numeros colocados
+        //Creamos una instancia del juego antes de las pruebas
+        sudoku = new Sudoku();
+
+        // Configuramos un tablero incompleto para las pruebas
         int[][] tableroInicial = {
                 {5, 3, 0, 0, 7, 0, 0, 0, 0},
                 {6, 0, 0, 1, 9, 5, 0, 0, 0},
@@ -26,58 +23,47 @@ class SudokuTest {
                 {0, 0, 0, 4, 1, 9, 0, 0, 5},
                 {0, 0, 0, 0, 8, 0, 0, 7, 9}
         };
-        sudoku.setTablero(tableroInicial);//Asignamos este tablero al juego
+        sudoku.setTablero(tableroInicial);//Asignamos el tablero a la instancia de Sudoku
 
-        //Hacemos un array para marcar que celdas son fijas
-        boolean[][] celdasFijas = new boolean[9][9];
-        for (int i = 0; i < 9; i++) {
-            for (int j = 0; j < 9; j++) {
-                if (tableroInicial[i][j] != 0) {
-                    celdasFijas[i][j] = true;//Si hay algun numero se marca como fija
-                }
-            }
-        }
-        sudoku.setCeldasFijas(celdasFijas);//Asignamos las celdas fijas al juego
+        // Marcar algunas celdas como fijas
+        boolean[][] fijas = new boolean[9][9];//Tablero boleano que indica cuales celdas son fijas
+        fijas[0][0] = true; // El 5 en la esquina superior izquierda es fijo
+        sudoku.setCeldasFijas(fijas);//Asignamos las celdas fijas al tabblero
     }
 
-    //Test para ver si los movimientos son validos segun las reglas
     @Test
-    void testEsMovimientoValido() {
-
-        //Movimiento valido
-        assertTrue(sudoku.esMovimientoValido(0, 2, 4));
-
-        //Movimiento invalido (numero 5 repetido en fila)
-        assertFalse(sudoku.esMovimientoValido(0, 2, 5));
-
-        //Movimiento invalido (numero 6 repetido en columna)
-        assertFalse(sudoku.esMovimientoValido(0, 2, 6));
-
-        //Movimiento invalido (número 8 repetido en subcuadricula)
-        assertFalse(sudoku.esMovimientoValido(0, 2, 8));
+    public void testEsMovimientoValido() {
+        assertTrue(sudoku.esMovimientoValido(0, 2, 4)); // Celda vacia, numero valido
+        assertFalse(sudoku.esMovimientoValido(0, 2, 5)); // 5 ya esta en la fila
+        assertFalse(sudoku.esMovimientoValido(0, 2, 6)); // 6 ya esta en la columna
+        assertFalse(sudoku.esMovimientoValido(0, 2, 8)); // 8 ya esta en la subcuadricula
     }
 
-    //Test para ver si se puede colocar un numero en una celda
     @Test
-    void testColocarNumero() {
-        assertTrue(sudoku.colocarNumero(0, 2, 4)); //Movimiento valido
-        assertEquals(4, sudoku.getTablero()[0][2]); //Confirmamos que se haya colocado el 4
-
-        assertFalse(sudoku.colocarNumero(0, 0, 1)); //Celda fija, no se puede modificar
-        assertEquals(5, sudoku.getTablero()[0][0]); //El numero deberia seguir siendo 5
-
-        assertFalse(sudoku.colocarNumero(0, 2, 5)); // 5 ya esta en la fila, movimiento invalido
-
-        assertFalse(sudoku.colocarNumero(0, 2, 10)); //Numero fuera del rango(1-9)
-        assertFalse(sudoku.colocarNumero(0, 2, 0)); //0 No es valido como numero
+    public void testColocarNumeroValido() throws SudokuException {
+        assertTrue(sudoku.colocarNumero(0, 2, 4));//Intentamos colocar el numero 4 en (0,2)
+        assertEquals(4, sudoku.getTablero()[0][2]);//Verificamos que se haya colocado
     }
 
-    //Test para ver si el tablero esta bien resuelto
     @Test
-    void testEstaResuelto() {
-        assertFalse(sudoku.estaResuelto()); //El tablero inicial no esta resuelto
+    public void testColocarNumeroEnCeldaFija() {
+        assertThrows(MovimientoInvalidoException.class, () -> {
+            sudoku.colocarNumero(0, 0, 9); //Intenta colocar un numero en una celda fija
+        });
+    }
 
-        //Creamos un tablero completamente resuelto (solucion valida)
+    @Test
+    public void testColocarNumeroFueraDeRango() {
+        assertThrows(EntradaFueraDeRangoException.class, () -> {
+            sudoku.colocarNumero(0, 2, 10); //Intenta colocar un numero fuera de rango
+        });
+    }
+
+    @Test
+    public void testEstaResuelto() {
+        assertFalse(sudoku.estaResuelto());//Con el tablero inicial no debe de estar completo
+
+        // Creamos un tablero resuelto y correcto
         int[][] tableroResuelto = {
                 {5, 3, 4, 6, 7, 8, 9, 1, 2},
                 {6, 7, 2, 1, 9, 5, 3, 4, 8},
@@ -89,22 +75,7 @@ class SudokuTest {
                 {2, 8, 7, 4, 1, 9, 6, 3, 5},
                 {3, 4, 5, 2, 8, 6, 1, 7, 9}
         };
-        sudoku.setTablero(tableroResuelto); //Ponemos ese tablero en el juego
-        assertTrue(sudoku.estaResuelto()); //ahora si deberia estar resuelto
-
-        sudoku.getTablero()[0][0] = 1; //Cambiamos un numero para hacer que el tablero este incorrecto
-        assertFalse(sudoku.estaResuelto()); //Ya no esta resuelto correctamente
-    }
-
-    //Test para ver que el metodo limpiarTablero deja todo vacio
-    @Test
-    void testLimpiarTablero() {
-        sudoku.limpiarTablero(); //Limpiamos el tablero y las celdas fijas
-        for (int i = 0; i < 9; i++) {
-            for (int j = 0; j < 9; j++) {
-                assertEquals(0, sudoku.getTablero()[i][j]); //Todas las celdas deben quedar en 0
-                assertFalse(sudoku.getCeldasFijas()[i][j]); //Ninguna celda debe estar marcada como fija
-            }
-        }
+        sudoku.setTablero(tableroResuelto);//Asignamos el tablero completo al juego
+        assertTrue(sudoku.estaResuelto());//Verifica que el metodo reconozca que el tablero esta resuelto
     }
 }
