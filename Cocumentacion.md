@@ -1,6 +1,6 @@
 ## 1. Documento de análisis de requerimientos
 
-### Objetivo general
+### Descripcion general
 Desarrollar una aplicación de escritorio en Java que permita a los usuarios jugar al juego de Sudoku, incluyendo generación automática de tableros, validación de jugadas en tiempo real, y verificación de la solución.
 
 ### Requisitos funcionales
@@ -18,6 +18,19 @@ Desarrollar una aplicación de escritorio en Java que permita a los usuarios jug
 - RNF4: Debe garantizarse la trazabilidad entre requisitos, código y pruebas.
 - RNF5: Las pruebas deben implementarse con JUnit.
 
+## Casos de Uso
+
+| ID    | Nombre             | Actor(es) | Precondición                  | Flujo Principal             || Postcondición                   |
+| ----- | ------------------ | --------- | ----------------------------- | --------------------------------------------------------- | ----------------------------------- | ------------------------------- |
+| CU-01 | Generar Sudoku     | Usuario   | Inicio de juego               | 1. Usuario selecciona nivel<br>2. Sistema genera tablero  |  | Tablero Sudoku generado         |
+| CU-02 | Introducir número  | Usuario   | Tablero generado              | 1. Usuario introduce número en celda<br>2. Sistema valida |  | Número insertado o rechazo      |
+| CU-03 | Validar movimiento | Sistema   | Número introducido            | Sistema comprueba reglas Sudoku                        |  | Movimiento aceptado o rechazado |
+| CU-04 | Mostrar error      | Sistema   | Movimiento inválido detectado | El sistema muestra mensaje de error                       |                                  | Usuario informado del error     |
+
+### Objetivos
+- Proveer un juego funcional y estable de Sudoku
+- Garantizar respuesta rápida en la UI  
+- Documentar el código y sus funcionalidades       
 ---
 
 ## 2. Diagramas UML
@@ -96,10 +109,7 @@ classDiagram
 | RF4       | `Sudoku.estaResuelto()`          | `SudokuTest.testEstaResuelto()`        |
 | RF5       | `SudokuGUI`                      | `SudokuGUITest.testCreacionGUI()`         |
 | RNF5      | Todas las clases                 | Múltiples pruebas con JUnit            |
-
 ---
-
-
 ## 4. Código Fuente
 El proyecto incluye las siguientes clases, todas documentadas y comentadas en el código:
 
